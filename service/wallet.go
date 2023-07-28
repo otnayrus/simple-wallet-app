@@ -41,6 +41,24 @@ func (ws *walletService) Initialize(req types.InitializeRequest) (types.Initiali
 	}, nil
 }
 
+func (ws *walletService) Enable(req types.EnableRequest) (types.EnableResponse, error) {
+	wallet, err := ws.walletRepo.Enable(req.Token)
+	if err != nil {
+		log.Println("walletService.Enable.Enable", err)
+		return types.EnableResponse{}, err
+	}
+
+	return types.EnableResponse{
+		ID:        wallet.ID,
+		OwnedBy:   wallet.OwnedBy,
+		Status:    wallet.GetStatusString(),
+		EnabledAt: wallet.UpdatedAt.Time,
+		Balance:   wallet.Balance,
+	}, nil
+}
+
+// helpers
+
 func makeToken() (string, error) {
 	length := 20
 

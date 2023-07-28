@@ -29,6 +29,7 @@ func main() {
 	v1 := router.Group("/api/v1")
 
 	v1.POST("/init", walletHandler.Initialize)
+	v1.POST("/wallet", walletHandler.Enable)
 
 	srv := &http.Server{
 		Handler:      router,
@@ -52,7 +53,7 @@ func migrate(db *sql.DB) {
 			token string not null unique,
 			status int not null,
 			updated_at timestamp,
-			balance int not null
+			balance real not null
 		);
 	`
 	_, err := db.Exec(createWalletsStmt)
@@ -67,7 +68,7 @@ func migrate(db *sql.DB) {
 			sender string not null,
 			recipient string not null,
 			action int not null,
-			amount int not null
+			amount real not null
 		);
 	`
 	_, err = db.Exec(createMutationsStmt)

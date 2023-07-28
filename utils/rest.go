@@ -47,3 +47,13 @@ func MakeRestResponse(w http.ResponseWriter, data interface{}, status int, err e
 func InitRestContext() context.Context {
 	return context.Background()
 }
+
+type WalletWrapper struct {
+	Wallet interface{} `json:"wallet"`
+}
+
+func AddWalletWrapper(data interface{}) WalletWrapper {
+	return WalletWrapper{
+		Wallet: data,
+	}
+}
