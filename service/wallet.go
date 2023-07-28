@@ -78,6 +78,22 @@ func (ws *walletService) ViewBalance(req types.ViewBalanceRequest) (types.ViewBa
 	}, nil
 }
 
+func (ws *walletService) Disable(req types.DisableRequest) (types.DisableResponse, error) {
+	wallet, err := ws.walletRepo.Disable(req.Token)
+	if err != nil {
+		log.Println("walletService.Disable.Disable", err)
+		return types.DisableResponse{}, err
+	}
+
+	return types.DisableResponse{
+		ID:         wallet.ID,
+		OwnedBy:    wallet.OwnedBy,
+		Status:     wallet.GetStatusString(),
+		DisabledAt: wallet.UpdatedAt.Time,
+		Balance:    wallet.Balance,
+	}, nil
+}
+
 // helpers
 
 func makeToken() (string, error) {

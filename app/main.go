@@ -30,6 +30,7 @@ func main() {
 
 	v1.POST("/init", walletHandler.Initialize)
 	v1.POST("/wallet", walletHandler.Enable)
+	v1.PATCH("/wallet", walletHandler.Disable)
 	v1.GET("/wallet", walletHandler.ViewBalance)
 
 	srv := &http.Server{
@@ -66,9 +67,10 @@ func migrate(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS mutations (
 			id string primary key,
 			reference_id string unique,
-			sender string not null,
-			recipient string not null,
+			created_at timestamp not null,
+			created_by string not null,
 			action int not null,
+			status int not null,
 			amount real not null
 		);
 	`

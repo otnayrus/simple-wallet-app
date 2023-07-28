@@ -9,12 +9,14 @@ type WalletService interface {
 	Initialize(InitializeRequest) (InitializeResponse, error)
 	Enable(EnableRequest) (EnableResponse, error)
 	ViewBalance(ViewBalanceRequest) (ViewBalanceResponse, error)
+	Disable(DisableRequest) (DisableResponse, error)
 }
 
 type WalletRepository interface {
 	Create(Wallet) error
 	Enable(string) (Wallet, error)
 	GetByToken(string) (Wallet, error)
+	Disable(token string) (Wallet, error)
 }
 
 type WalletStatus int
@@ -83,5 +85,18 @@ type (
 		Status    string    `json:"status"`
 		EnabledAt time.Time `json:"enabled_at"`
 		Balance   float64   `json:"balance"`
+	}
+
+	DisableRequest struct {
+		Token      string
+		IsDisabled bool `form:"is_disabled"`
+	}
+
+	DisableResponse struct {
+		ID         string    `json:"id"`
+		OwnedBy    string    `json:"owned_by"`
+		Status     string    `json:"status"`
+		DisabledAt time.Time `json:"disabled_at"`
+		Balance    float64   `json:"balance"`
 	}
 )

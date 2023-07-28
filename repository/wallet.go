@@ -17,7 +17,7 @@ const (
 		VALUES ($1, $2, $3, $4, $5, $6);
 	`
 
-	enableWalletQuery = `
+	updateWalletStatusQuery = `
 		UPDATE wallets
 		SET
 			status = $1,
@@ -56,7 +56,7 @@ func (wr *walletRepository) Create(req types.Wallet) error {
 func (wr *walletRepository) Enable(token string) (types.Wallet, error) {
 	var data types.Wallet
 	err := wr.db.QueryRow(
-		enableWalletQuery,
+		updateWalletStatusQuery,
 		types.StatusActive,
 		time.Now(),
 		token,
@@ -75,6 +75,25 @@ func (wr *walletRepository) Enable(token string) (types.Wallet, error) {
 func (wr *walletRepository) GetByToken(token string) (types.Wallet, error) {
 	var data types.Wallet
 	err := wr.db.QueryRow(getWalletByTokenQuery, token).Scan(
+		&data.ID,
+		&data.OwnedBy,
+		&data.Token,
+		&data.Status,
+		&data.UpdatedAt,
+		&data.Balance,
+	)
+
+	return data, err
+}
+
+func (wr *walletRepository) Disable(token string) (types.Wallet, error) {
+	var data types.Wallet
+	err := wr.db.QueryRow(
+		updateWalletStatusQuery,
+		types.StatusInactive,
+		time.Now(),
+		token,
+	).Scan(
 		&data.ID,
 		&data.OwnedBy,
 		&data.Token,
