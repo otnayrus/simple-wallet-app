@@ -61,3 +61,27 @@ func (wh *walletHandler) Enable(c *gin.Context) {
 
 	utils.MakeRestResponse(c.Writer, utils.AddWalletWrapper(res), http.StatusCreated, nil)
 }
+
+func (wh *walletHandler) ViewBalance(c *gin.Context) {
+	var header types.WalletRequestHeader
+
+	if err := c.BindHeader(&header); err != nil {
+		log.Println("fail to decode request header")
+		return
+	}
+
+	split := strings.Split(header.Authorization, " ")
+	if len(split) != 2 && split[0] != "Token" {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusBadRequest, errors.New("invalid request header"))
+		return
+	}
+	token := split[1]
+
+	res, err := wh.walletService.ViewBalance(types.ViewBalanceRequest{Token: token})
+	if err != nil {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.MakeRestResponse(c.Writer, utils.AddWalletWrapper(res), http.StatusCreated, nil)
+}

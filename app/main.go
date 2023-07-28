@@ -30,6 +30,7 @@ func main() {
 
 	v1.POST("/init", walletHandler.Initialize)
 	v1.POST("/wallet", walletHandler.Enable)
+	v1.GET("/wallet", walletHandler.ViewBalance)
 
 	srv := &http.Server{
 		Handler:      router,

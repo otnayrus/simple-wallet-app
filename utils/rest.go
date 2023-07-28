@@ -13,8 +13,8 @@ const (
 )
 
 type RestResponse struct {
-	Status string
-	Data   interface{}
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
 func MakeRestResponse(w http.ResponseWriter, data interface{}, status int, err error) {

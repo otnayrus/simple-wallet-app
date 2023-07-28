@@ -8,11 +8,13 @@ import (
 type WalletService interface {
 	Initialize(InitializeRequest) (InitializeResponse, error)
 	Enable(EnableRequest) (EnableResponse, error)
+	ViewBalance(ViewBalanceRequest) (ViewBalanceResponse, error)
 }
 
 type WalletRepository interface {
 	Create(Wallet) error
 	Enable(string) (Wallet, error)
+	GetByToken(string) (Wallet, error)
 }
 
 type WalletStatus int
@@ -64,6 +66,18 @@ type (
 	}
 
 	EnableResponse struct {
+		ID        string    `json:"id"`
+		OwnedBy   string    `json:"owned_by"`
+		Status    string    `json:"status"`
+		EnabledAt time.Time `json:"enabled_at"`
+		Balance   float64   `json:"balance"`
+	}
+
+	ViewBalanceRequest struct {
+		Token string
+	}
+
+	ViewBalanceResponse struct {
 		ID        string    `json:"id"`
 		OwnedBy   string    `json:"owned_by"`
 		Status    string    `json:"status"`

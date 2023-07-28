@@ -26,6 +26,12 @@ const (
 			token = $3
 		RETURNING id, owned_by, token, status, updated_at, balance;
 	`
+
+	getWalletByTokenQuery = `
+		SELECT id, owned_by, token, status, updated_at, balance
+		FROM wallets
+		WHERE token = $1;
+	`
 )
 
 func NewWalletRepositiory(db *sql.DB) types.WalletRepository {
@@ -55,6 +61,20 @@ func (wr *walletRepository) Enable(token string) (types.Wallet, error) {
 		time.Now(),
 		token,
 	).Scan(
+		&data.ID,
+		&data.OwnedBy,
+		&data.Token,
+		&data.Status,
+		&data.UpdatedAt,
+		&data.Balance,
+	)
+
+	return data, err
+}
+
+func (wr *walletRepository) GetByToken(token string) (types.Wallet, error) {
+	var data types.Wallet
+	err := wr.db.QueryRow(getWalletByTokenQuery, token).Scan(
 		&data.ID,
 		&data.OwnedBy,
 		&data.Token,

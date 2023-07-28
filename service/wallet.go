@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"log"
 
 	"github.com/google/uuid"
@@ -49,6 +50,26 @@ func (ws *walletService) Enable(req types.EnableRequest) (types.EnableResponse, 
 	}
 
 	return types.EnableResponse{
+		ID:        wallet.ID,
+		OwnedBy:   wallet.OwnedBy,
+		Status:    wallet.GetStatusString(),
+		EnabledAt: wallet.UpdatedAt.Time,
+		Balance:   wallet.Balance,
+	}, nil
+}
+
+func (ws *walletService) ViewBalance(req types.ViewBalanceRequest) (types.ViewBalanceResponse, error) {
+	wallet, err := ws.walletRepo.GetByToken(req.Token)
+	if err != nil {
+		log.Println("walletService.ViewBalance", err)
+		return types.ViewBalanceResponse{}, err
+	}
+
+	if wallet.Status != int(types.StatusActive) {
+		return types.ViewBalanceResponse{}, errors.New("wallet is disabled")
+	}
+
+	return types.ViewBalanceResponse{
 		ID:        wallet.ID,
 		OwnedBy:   wallet.OwnedBy,
 		Status:    wallet.GetStatusString(),
