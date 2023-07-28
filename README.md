@@ -1,3 +1,15 @@
+# How to run
+
+## Run via binary
+(only work on `darwin/amd64` arch)
+1. Locate your terminal to this repository
+2. Perform `chmod +x main.go` (in some cases)
+3. Perform `./main`
+
+## Run via GO
+1. Locate your terminal to this repository
+2. Perform `go run app/main.go`
+
 ## Example Requests
 
 ### Init wallet
@@ -15,6 +27,12 @@ curl --location --request POST 'http://localhost:8000/api/v1/wallet' \
 ### View wallet balance
 ```
 curl --location 'http://localhost:8000/api/v1/wallet' \
+--header 'Authorization: Token 9626dea978df941e8f7e72a2561b6bc66d15e125'
+```
+
+### View wallet mutations
+```
+curl --location 'http://localhost:8000/api/v1/wallet/transactions' \
 --header 'Authorization: Token 9626dea978df941e8f7e72a2561b6bc66d15e125'
 ```
 
