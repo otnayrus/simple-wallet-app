@@ -32,6 +32,8 @@ func main() {
 	v1.POST("/wallet", walletHandler.Enable)
 	v1.PATCH("/wallet", walletHandler.Disable)
 	v1.GET("/wallet", walletHandler.ViewBalance)
+	v1.POST("/wallet/deposits", walletHandler.Deposit)
+	v1.POST("/wallet/withdrawals", walletHandler.Withdraw)
 
 	srv := &http.Server{
 		Handler:      router,

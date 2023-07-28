@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	types "github.com/otnayrus/simple-wallet-app/types/wallet"
@@ -91,6 +92,82 @@ func (ws *walletService) Disable(req types.DisableRequest) (types.DisableRespons
 		Status:     wallet.GetStatusString(),
 		DisabledAt: wallet.UpdatedAt.Time,
 		Balance:    wallet.Balance,
+	}, nil
+}
+
+func (ws *walletService) Deposit(req types.DepositRequest) (types.DepositResponse, error) {
+	wallet, err := ws.walletRepo.GetByToken(req.Token)
+	if err != nil {
+		log.Println("walletService.Deposit", err)
+		return types.DepositResponse{}, err
+	}
+
+	if wallet.Status != int(types.StatusActive) {
+		return types.DepositResponse{}, errors.New("wallet is inactive")
+	}
+
+	mutation := types.Mutation{
+		ID:          uuid.NewString(),
+		ReferenceID: req.ReferenceID,
+		CreatedAt:   time.Now(),
+		CreatedBy:   wallet.OwnedBy,
+		Action:      int(types.MutationActionDeposit),
+		Status:      int(types.MutationStatusSuccess),
+		Amount:      req.Amount,
+	}
+	err = ws.walletRepo.Mutate(mutation, wallet.Balance+req.Amount, req.Token)
+	if err != nil {
+		log.Println("walletService.Deposit", err)
+		return types.DepositResponse{}, err
+	}
+
+	return types.DepositResponse{
+		ID:          mutation.ID,
+		DepositedBy: mutation.CreatedBy,
+		Status:      mutation.GetStatusString(),
+		DepositedAt: mutation.CreatedAt,
+		Amount:      mutation.Amount,
+		ReferenceID: mutation.ReferenceID,
+	}, nil
+}
+
+func (ws *walletService) Withdraw(req types.WithdrawRequest) (types.WithdrawResponse, error) {
+	wallet, err := ws.walletRepo.GetByToken(req.Token)
+	if err != nil {
+		log.Println("walletService.Withdraw", err)
+		return types.WithdrawResponse{}, err
+	}
+
+	if wallet.Status != int(types.StatusActive) {
+		return types.WithdrawResponse{}, errors.New("wallet is inactive")
+	}
+
+	if wallet.Balance < req.Amount {
+		return types.WithdrawResponse{}, errors.New("insufficient funds")
+	}
+
+	mutation := types.Mutation{
+		ID:          uuid.NewString(),
+		ReferenceID: req.ReferenceID,
+		CreatedAt:   time.Now(),
+		CreatedBy:   wallet.OwnedBy,
+		Action:      int(types.MutationActionWithdraw),
+		Status:      int(types.MutationStatusSuccess),
+		Amount:      req.Amount,
+	}
+	err = ws.walletRepo.Mutate(mutation, wallet.Balance-req.Amount, req.Token)
+	if err != nil {
+		log.Println("walletService.Withdraw", err)
+		return types.WithdrawResponse{}, err
+	}
+
+	return types.WithdrawResponse{
+		ID:          mutation.ID,
+		WithdrawnBy: mutation.CreatedBy,
+		Status:      mutation.GetStatusString(),
+		WithdrawnAt: mutation.CreatedAt,
+		Amount:      mutation.Amount,
+		ReferenceID: mutation.ReferenceID,
 	}, nil
 }
 

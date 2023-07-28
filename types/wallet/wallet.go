@@ -10,6 +10,8 @@ type WalletService interface {
 	Enable(EnableRequest) (EnableResponse, error)
 	ViewBalance(ViewBalanceRequest) (ViewBalanceResponse, error)
 	Disable(DisableRequest) (DisableResponse, error)
+	Deposit(DepositRequest) (DepositResponse, error)
+	Withdraw(WithdrawRequest) (WithdrawResponse, error)
 }
 
 type WalletRepository interface {
@@ -17,6 +19,9 @@ type WalletRepository interface {
 	Enable(string) (Wallet, error)
 	GetByToken(string) (Wallet, error)
 	Disable(token string) (Wallet, error)
+	Mutate(Mutation, float64, string) error
+	SetWalletBalanceByToken(float64, string) error
+	CreateMutation(Mutation) error
 }
 
 type WalletStatus int
@@ -25,7 +30,9 @@ const (
 	StatusInactive WalletStatus = iota
 	StatusNewlyCreated
 	StatusActive
+)
 
+const (
 	StatusStringEnabled  string = "enabled"
 	StatusStringDisabled string = "disabled"
 )
@@ -98,5 +105,35 @@ type (
 		Status     string    `json:"status"`
 		DisabledAt time.Time `json:"disabled_at"`
 		Balance    float64   `json:"balance"`
+	}
+
+	DepositRequest struct {
+		Token       string
+		ReferenceID string  `form:"reference_id"`
+		Amount      float64 `form:"amount"`
+	}
+
+	DepositResponse struct {
+		ID          string    `json:"id"`
+		DepositedBy string    `json:"deposited_by"`
+		Status      string    `json:"status"`
+		DepositedAt time.Time `json:"deposited_at"`
+		Amount      float64   `json:"amount"`
+		ReferenceID string    `json:"reference_id"`
+	}
+
+	WithdrawRequest struct {
+		Token       string
+		ReferenceID string  `form:"reference_id"`
+		Amount      float64 `form:"amount"`
+	}
+
+	WithdrawResponse struct {
+		ID          string    `json:"id"`
+		WithdrawnBy string    `json:"withdrawn_by"`
+		Status      string    `json:"status"`
+		WithdrawnAt time.Time `json:"withdrawn_at"`
+		Amount      float64   `json:"amount"`
+		ReferenceID string    `json:"reference_id"`
 	}
 )

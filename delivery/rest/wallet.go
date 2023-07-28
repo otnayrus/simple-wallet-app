@@ -83,7 +83,7 @@ func (wh *walletHandler) ViewBalance(c *gin.Context) {
 		return
 	}
 
-	utils.MakeRestResponse(c.Writer, utils.AddWalletWrapper(res), http.StatusCreated, nil)
+	utils.MakeRestResponse(c.Writer, utils.AddWalletWrapper(res), http.StatusOK, nil)
 }
 
 func (wh *walletHandler) Disable(c *gin.Context) {
@@ -118,4 +118,74 @@ func (wh *walletHandler) Disable(c *gin.Context) {
 	}
 
 	utils.MakeRestResponse(c.Writer, utils.AddWalletWrapper(res), http.StatusCreated, nil)
+}
+
+func (wh *walletHandler) Deposit(c *gin.Context) {
+	var header types.WalletRequestHeader
+	if err := c.BindHeader(&header); err != nil {
+		log.Println("fail to decode request header")
+		return
+	}
+
+	split := strings.Split(header.Authorization, " ")
+	if len(split) != 2 && split[0] != "Token" {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusBadRequest, errors.New("invalid request header"))
+		return
+	}
+	token := split[1]
+
+	var req types.DepositRequest
+	if err := c.Bind(&req); err != nil {
+		log.Println("fail to decode request body")
+		return
+	}
+	req.Token = token
+
+	if req.Amount <= 0 {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusBadRequest, errors.New("invalid amount value"))
+		return
+	}
+
+	res, err := wh.walletService.Deposit(req)
+	if err != nil {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.MakeRestResponse(c.Writer, utils.AddDepositWrapper(res), http.StatusCreated, nil)
+}
+
+func (wh *walletHandler) Withdraw(c *gin.Context) {
+	var header types.WalletRequestHeader
+	if err := c.BindHeader(&header); err != nil {
+		log.Println("fail to decode request header")
+		return
+	}
+
+	split := strings.Split(header.Authorization, " ")
+	if len(split) != 2 && split[0] != "Token" {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusBadRequest, errors.New("invalid request header"))
+		return
+	}
+	token := split[1]
+
+	var req types.WithdrawRequest
+	if err := c.Bind(&req); err != nil {
+		log.Println("fail to decode request body")
+		return
+	}
+	req.Token = token
+
+	if req.Amount <= 0 {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusBadRequest, errors.New("invalid amount value"))
+		return
+	}
+
+	res, err := wh.walletService.Withdraw(req)
+	if err != nil {
+		utils.MakeRestResponse(c.Writer, nil, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.MakeRestResponse(c.Writer, utils.AddWithdrawWrapper(res), http.StatusCreated, nil)
 }

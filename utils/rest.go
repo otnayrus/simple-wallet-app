@@ -22,7 +22,7 @@ func MakeRestResponse(w http.ResponseWriter, data interface{}, status int, err e
 	if err != nil {
 		statusStr = StatusError
 		data = struct {
-			Error error
+			Error error `json:"error"`
 		}{
 			Error: err,
 		}
@@ -52,8 +52,28 @@ type WalletWrapper struct {
 	Wallet interface{} `json:"wallet"`
 }
 
+type DepositWrapper struct {
+	Deposit interface{} `json:"deposit"`
+}
+
+type WithdrawWrapper struct {
+	Withdraw interface{} `json:"withdraw"`
+}
+
 func AddWalletWrapper(data interface{}) WalletWrapper {
 	return WalletWrapper{
 		Wallet: data,
+	}
+}
+
+func AddDepositWrapper(data interface{}) DepositWrapper {
+	return DepositWrapper{
+		Deposit: data,
+	}
+}
+
+func AddWithdrawWrapper(data interface{}) WithdrawWrapper {
+	return WithdrawWrapper{
+		Withdraw: data,
 	}
 }
