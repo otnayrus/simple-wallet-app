@@ -46,6 +46,13 @@ const (
 		INSERT INTO mutations (id, reference_id, created_at, created_by, action, status, amount)
 		VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
+
+	getMutationListQuery = `
+		SELECT id, reference_id, created_at, created_by, action, status, amount
+		FROM mutations
+		WHERE created_by = $1
+		ORDER BY created_at DESC;
+	`
 )
 
 func NewWalletRepositiory(db *sql.DB) types.WalletRepository {
@@ -167,4 +174,30 @@ func (wr *walletRepository) Mutate(req types.Mutation, expectedBalance float64, 
 	}
 
 	return err
+}
+
+func (wr *walletRepository) ListMutation(ownerID string) ([]types.Mutation, error) {
+	rows, err := wr.db.Query(getMutationListQuery, ownerID)
+	defer rows.Close()
+
+	var mutations []types.Mutation
+	for rows.Next() {
+		var mutation types.Mutation
+		err := rows.Scan(
+			&mutation.ID,
+			&mutation.ReferenceID,
+			&mutation.CreatedAt,
+			&mutation.CreatedBy,
+			&mutation.Action,
+			&mutation.Status,
+			&mutation.Amount,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		mutations = append(mutations, mutation)
+	}
+
+	return mutations, err
 }

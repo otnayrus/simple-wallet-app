@@ -171,6 +171,48 @@ func (ws *walletService) Withdraw(req types.WithdrawRequest) (types.WithdrawResp
 	}, nil
 }
 
+func (ws *walletService) ListMutation(req types.MutationListRequest) ([]interface{}, error) {
+	wallet, err := ws.walletRepo.GetByToken(req.Token)
+	if err != nil {
+		log.Println("walletService.ListMutation", err)
+		return nil, err
+	}
+
+	list, err := ws.walletRepo.ListMutation(wallet.OwnedBy)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []interface{}
+	for _, mutation := range list {
+		switch mutation.Action {
+		case int(types.MutationActionDeposit):
+			res = append(res, types.DepositResponse{
+				ID:          mutation.ID,
+				DepositedBy: mutation.CreatedBy,
+				Status:      mutation.GetStatusString(),
+				DepositedAt: mutation.CreatedAt,
+				Amount:      mutation.Amount,
+				ReferenceID: mutation.ReferenceID,
+			})
+			break
+		case int(types.MutationActionWithdraw):
+			res = append(res, types.WithdrawResponse{
+				ID:          mutation.ID,
+				WithdrawnBy: mutation.CreatedBy,
+				Status:      mutation.GetStatusString(),
+				WithdrawnAt: mutation.CreatedAt,
+				Amount:      mutation.Amount,
+				ReferenceID: mutation.ReferenceID,
+			})
+			break
+		}
+
+	}
+
+	return res, nil
+}
+
 // helpers
 
 func makeToken() (string, error) {

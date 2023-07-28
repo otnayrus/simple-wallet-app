@@ -12,6 +12,7 @@ type WalletService interface {
 	Disable(DisableRequest) (DisableResponse, error)
 	Deposit(DepositRequest) (DepositResponse, error)
 	Withdraw(WithdrawRequest) (WithdrawResponse, error)
+	ListMutation(MutationListRequest) ([]interface{}, error)
 }
 
 type WalletRepository interface {
@@ -22,6 +23,7 @@ type WalletRepository interface {
 	Mutate(Mutation, float64, string) error
 	SetWalletBalanceByToken(float64, string) error
 	CreateMutation(Mutation) error
+	ListMutation(ownerID string) ([]Mutation, error)
 }
 
 type WalletStatus int
@@ -135,5 +137,9 @@ type (
 		WithdrawnAt time.Time `json:"withdrawn_at"`
 		Amount      float64   `json:"amount"`
 		ReferenceID string    `json:"reference_id"`
+	}
+
+	MutationListRequest struct {
+		Token string
 	}
 )

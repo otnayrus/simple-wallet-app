@@ -34,6 +34,7 @@ func main() {
 	v1.GET("/wallet", walletHandler.ViewBalance)
 	v1.POST("/wallet/deposits", walletHandler.Deposit)
 	v1.POST("/wallet/withdrawals", walletHandler.Withdraw)
+	v1.GET("/wallet/transactions", walletHandler.GetMutationList)
 
 	srv := &http.Server{
 		Handler:      router,
